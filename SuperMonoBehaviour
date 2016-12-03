@@ -1,0 +1,38 @@
+using UnityEngine;
+using System.Collections;
+using System.Reflection;
+using System;
+
+public class SuperMonoBehaviour : MonoBehaviour
+{
+    private static object behaviourWeAreCopyingFrom;
+    private static FieldInfo[] fieldsToCopy;
+
+    [ContextMenu("Copy With Reflection")]
+    public void CopyWithReflection()
+    {
+        behaviourWeAreCopyingFrom = this;
+        Type behaviourType = this.GetType();
+        FieldInfo[] behaviourFields = behaviourType.GetFields(BindingFlags.Public | BindingFlags.Instance);
+        fieldsToCopy = behaviourFields;
+        Debug.Log(fieldsToCopy.Length);
+    }
+
+    [ContextMenu("Plaste With Reflection")]
+    public void PlasteWithReflection()
+    {
+        Type behaviourType = this.GetType();
+        FieldInfo[] behaviourFields = behaviourType.GetFields(BindingFlags.Public | BindingFlags.Instance);
+        foreach (FieldInfo field in fieldsToCopy)
+        {
+            object value = field.GetValue(behaviourWeAreCopyingFrom);
+            foreach (FieldInfo thisField in behaviourFields)
+            {
+                if (thisField.Name == field.Name && thisField.FieldType == field.FieldType)
+                {
+                    field.SetValue(this, value);
+                }
+            }
+        }
+    }
+}
